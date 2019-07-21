@@ -74,7 +74,7 @@ When semi-tryptic searches are used, a given peptide sequence can be fully-trypt
 
 ---
 
-### Zero Da windows
+### Delta mass windows
 
 The first step in the `histo_GUI.py` processing is to make delta mass histograms. Comet/PAW is designed for wider tolerance searches so that accurate mass can be used to distinguish correct matches from incorrect matches (using the decoy sequences as noise proxies). We expect most correct matches to have accurate masses and have the measured masses be within a few PPM of the calculated peptide sequence masses. That will be a sharp peak in the delta mass histogram near zero Da. We used plus/minus 1.25 Da. We will plot a histogram for the full range, for the region around zero Da, and for a region around one Da. We will do separate delta mass histograms by charge state. This is the 2+ ions:
 
@@ -101,6 +101,12 @@ Here are the histograms for the 3+ PSMs:
 And, finally, the 4+ ions:
 
 ![4plus_deltamass](images/deltamass_4plus.png)
+
+---
+
+### Conditional score histograms
+
+### Zero Da delta mass windows
 
 Once we have the delta mass windows adjusted to capture the peaks of interest, we can create the conditional score histograms. The GUI will use multi-tabbed windows to accommodate the numerous peptide subclasses. I usually work in a left-to-right fashion, so here are the 2+ unmodified peptides for the zero Da peptides:
 
@@ -129,7 +135,7 @@ Some general observations: the decoy distributions accurately model the shape (p
 
 ---
 
-### One Da windows
+### One Da delta mass windows
 
 The one Da windows have different signal-to-noise. The one Da peaks are typically much smaller than the zero Da peak, yet they sit on about the same noise level. We will have the unmodified peptides fist then the oxidized Met peptides. The 2+ first:
 
@@ -164,3 +170,41 @@ And the 4+ peptides for the one Da window:
 ![scores_none_4plus_oxMet](images/scores_none_4plus_oxMet.png)
 
 Things are generally similar to the other subclass distributions, but the overall numbers of correct matches is smaller. We have a considerably more noise (larger relative red distributions compared to the blue), so we have to set higher score cutoffs to keep the 1% FDR. For this data, we have quite a few "extra" matches that we would have lost if we had strictly required accurate masses.
+
+---
+
+### PSM statistics
+
+The PAW filtering requires that peptides be at least 7 amino acids in length. Charge states of 2+, 3+, and 4+ are allowed for high resolution data. Each peptide subclass is filtered independently to a 1% FDR so that an overall dataset FDR of 1% can be obtained. We can tally the numbers of net correct matches in the various subclasses to see what the data characteristics are. There were 1,262,185 MS2 scans in total. There were 248,853 scans that exceeded the discriminant score thresholds. The overall ID rate was 19.7%
+
+**Delta mass windows**
+
+Window|Scans|Fraction
+------|-----|--------
+Zero Da|181,572|73.8%
+One Da|30,321|12.3%
+Outside|34,060|13.8%
+
+**Charge states**
+
+Charge|Scans|Fraction
+------|-----|--------
+2+|132,889|54.0%
+3+|93,579|38.0%
+4+|19,485|7.9%
+
+**Number of tryptic termini**
+
+NTT|Scans|Fraction
+------|-----|--------
+Full|200,295|81.4%
+Semi|45,658|18.6%
+
+**Modification state**
+
+State|Scans|Fraction
+------|-----|--------
+no Mods|209,580|85.2%
+ox Met|36,373|14.8%
+
+---
