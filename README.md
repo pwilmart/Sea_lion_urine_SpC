@@ -272,6 +272,10 @@ This view is rather different. Those 190 proteins (just 8% of the total) account
 
 ---
 
-## Quantitative data prepare
+## Quantitative data prep
 
- 
+[low count cutoff](https://pwilmart.github.io/TMT_analysis_examples/PXD009019_average_missing.html)
+
+[QC check](https://pwilmart.github.io/TMT_analysis_examples/PXD009019_QC_check.html)
+
+[DE testing](https://pwilmart.github.io/TMT_analysis_examples/PXD009019_SpC_DE.html)
