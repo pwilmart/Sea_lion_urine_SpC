@@ -55,7 +55,7 @@ When (**Ref-1**) was published, the California sea lion (taxon = 9704) genome wa
 
 ## PAW processing
 
-The README.md file in [PAW_pipeline](https://github.com/pwilmart/PAW_pipeline.git) repository describes the pipeline in detail including installation instructions. The first step is to convert the RAw files to MS2-format files using [`msconvert_GUI.py`](https://github.com/pwilmart/PAW_pipeline/blob/master/docs/msconvert_GUI.md). The default settings were used with MS2 selected for the data to extract. There were an average of 66,431 MS2 scans per LC run (SD = 4,845; max = 71,966; min = 50,459) for a total dataset size of 1,262,185 MS2 scans.
+The README.md file in [PAW_pipeline](https://github.com/pwilmart/PAW_pipeline.git) repository describes the pipeline in detail including installation instructions. The first step is to convert the Thermo RAW files to MS2-format files using [`msconvert_GUI.py`](https://github.com/pwilmart/PAW_pipeline/blob/master/docs/msconvert_GUI.md). The default settings were used with MS2 selected for the data to extract. There were an average of 66,431 MS2 scans per LC run (SD = 4,845; max = 71,966; min = 50,459) for a total dataset size of 1,262,185 MS2 scans.
 
 Comet was configured for a semi-tryptic search using the FASTA file described above for sea lion. Semi-trpytic searches should be used for any biofluid samples (serum, plasma, saliva, urine, CSF, CVF, sweat, tear, etc.) as endogenous proteases, signal peptide removal and other protein processing can results in peptides that are not fully tryptic with respect to the sequence in the FASTA file. These searches increase search space and take longer than regular tryptic searches. Some other key Comet parameters are listed below:
 
@@ -114,7 +114,7 @@ And, finally, the 4+ ions:
 
 ### Zero Da delta mass windows
 
-Once we have the delta mass windows adjusted to capture the peaks of interest, we can create the conditional score histograms. The GUI will use multi-tabbed windows to accommodate the numerous peptide subclasses. I usually work in a left-to-right fashion, so here are the 2+ unmodified peptides for the zero Da peptides:
+Once we have the delta mass windows adjusted to capture the peaks of interest, we can create the conditional score histograms. The scores used in the histograms are [PeptideProphet-like](https://pubs.acs.org/doi/abs/10.1021/ac025747h) discriminant functions. The sensitivity of this (non-optimized) static classifier method is generally equal to or slightly better than [Percolator](https://www.nature.com/articles/nmeth1113). The GUI will use multi-tabbed windows to accommodate the numerous peptide subclasses. I usually work in a left-to-right fashion, so here are the 2+ unmodified peptides for the zero Da peptides:
 
 ![scores_zeroDa_2plus_noMod](images/scores_zeroDa_2plus_noMod.png)
 
@@ -132,7 +132,7 @@ And for the oxidized Met peptides:
 
 ![scores_zeroDa_3plus_oxMet](images/scores_zeroDa_3plus_oxMet.png)
 
-Here are the images for the 4+ peptides in the zero Da window:
+Here are the screen catures for the 4+ peptides in the zero Da window:
 
 ![scores_zeroDa_4plus_noMod](images/scores_zeroDa_4plus_noMod.png)
 ![scores_zeroDa_4plus_oxMet](images/scores_zeroDa_4plus_oxMet.png)
@@ -162,20 +162,20 @@ Things are generally similar to the zero Da distributions, but the overall numbe
 
 ### PSMs without an accurate mass
 
-Interestingly, not all peptides selected for sequencing in OrbiTraps actually have an accurate measured mass (and maybe not a defined charge state). How many of these we may have depends on many factors: instrument settings, sample composition, etc. The 2+ first:
+Interestingly, not all peptides selected for sequencing in OrbiTraps actually have an accurate measured mass (and maybe not a defined charge state). How many of these we may have depends on many factors: instrument settings, sample composition, etc. The 2+ peptides first:
 
 ![scores_none_2plus_noMod](images/scores_none_2plus_noMod.png)
 ![scores_none_2plus_oxMet](images/scores_none_2plus_oxMet.png)
 
-The 3+ peptides:
+The 3+ peptides outside of windows:
 ![scores_none_3plus_noMod](images/scores_none_3plus_noMod.png)
 ![scores_none_3plus_oxMet](images/scores_none_3plus_oxMet.png)
 
-And the 4+ peptides for the one Da window:
+And the 4+ peptides outside of windows:
 ![scores_none_4plus_noMod](images/scores_none_4plus_noMod.png)
 ![scores_none_4plus_oxMet](images/scores_none_4plus_oxMet.png)
 
-Things are generally similar to the other subclass distributions, but the overall numbers of correct matches are usually smaller. We have a considerably more noise (larger relative red distributions compared to the blue), so we have to set higher score cutoffs to keep the 1% FDR. For this data, we have quite a few "extra" matches that we would have lost if we had strictly required accurate masses.
+Things are generally similar to the other subclass distributions, but the overall numbers of correct matches are usually smaller. We have a considerably more noise (larger relative red distributions compared to the blue), so we have to set higher score cutoffs to keep the 1% FDR. For this data, we have quite a few "extra" matches that we would have lost if we had required strict accurate masses.
 
 ---
 
@@ -213,7 +213,7 @@ State|Scans|Fraction
 no Mods|209,580|85.2%
 ox Met|36,373|14.8%
 
-We have 3/4 of the identifications falling inside of the zero Da delta mass window. Surprisingly, we have more identifications without an accurate mass than there were in the one Da delta mass window. There are mostly 2+ and 3+ peptides with far fewer 4+ peptides. This is pretty typical for trypsin digests. We have appreciable numbers of semi-trpytic and oxidized Met identifications. The concern with not including these peptide forms in the search settings is that their fraction per sample may not be the same between conditions. Ignoring them could introduce some bias into the measurements.  
+We have 3/4 of the identifications falling inside of the zero Da delta mass window. Surprisingly, we have more identifications **without an accurate mass** than there were in the one Da delta mass window. There are mostly 2+ and 3+ peptides with far fewer 4+ peptides. This is pretty typical for trypsin digests. We have appreciable numbers of semi-trpytic and oxidized Met identifications. The concern with not including these peptide forms in the search settings is that their relative fractions per sample may not be the same between different samples/conditions. Ignoring them could introduce some bias into the measurements.  
 
 ---
 
@@ -234,7 +234,7 @@ After homology grouping|2,336|21
 
 We see that the 1% PSM FDR cutoff resulted in a similar 1% protein FRD estimate. The protein FDR depends on the number of incorrect PSMs per sample, the effective database size, and the number of samples in the experiment. The PAW pipeline does not use ad hoc, untested, heuristic protein ranking functions. The protein FDR is a consequence of the number of incorrect PSMs being accepted. To make the protein list more or less strict, one would need to change the PSM score thresholds and redo the protein inference.
 
-The `PAW_results.py` script produces several output files:
+The `PAW_results.py` script produces several output and log files:
 
 File(s)|Count|Description
 ----|-----|-----------
@@ -246,7 +246,7 @@ grouped_protein_summary_9.txt|1|Non-redundant proteins with extended parsimony
 
 The detailed PSM-level reports have search scores, masses, etc. for each PSM associated with the final parsimonious protein list (it is not all PSMs - those are in the filtered files folder which is not in the repository).
 
-The basic peptide and protein summaries are better for information about identifications. A question faced by programmers for any proteomics result report is how to represent protein group members. Protein groups (in a basic parsimony context) are proteins indistinguishable based on their observed peptides. Some proteins ony have peptides that map back to a single entry in the FASTA file. Those are trivial cases since protein groups with single members are obvious single rows in any output table. If protein groups have more than one member, then there are choices to consider. A single representative member of the group can be used to represent the group so that each protein or protein group is a single row in an output table. That shifts the question to which protein to use as the representative one. Another choice is to wrap multiple bits of information into each cell using some scheme based on separator characters. That always complicates downstream data parsing as cells have to be tested for single items or multiple items (and then also a question of what to do about multiple items...). The choice that I made was to have a separate row for each group member. This is what I mean by a "redundant" protein summary. Protein group number format and a text column to denote redundant additional group members are needed to make the table structure obvious. Simple tab-delimited text files do not support tree-like views where items (protein groups) can be expanded or collapsed. These can be used in GUI table viewers but that is another topic. The peptide summaries are more non-redundant in that each protein group is represented by the integral protein group number (the protein group number can be used to relate the peptide and protein tables to each other).
+The basic peptide and protein summaries are better for information about identifications. A question faced by programmers for any proteomics result report is how to represent protein group members. Protein groups (in a basic parsimony context) are proteins indistinguishable based on their observed peptides. Some proteins ony have peptides that map back to a single entry in the FASTA file. Those are trivial cases since protein groups with single members are obvious single rows in any output table. If protein groups have more than one member, then there are choices to consider. A single representative member of the group can be used to represent the group so that each protein or protein group is a single row in an output table. That shifts the question to which protein to use as the representative one. Another choice is to wrap multiple bits of information into each cell using some scheme based on separator characters. That always complicates downstream data parsing as cells have to be tested for single items or multiple items (and then we have the question of what to do about multiple items...). The choice that I made in the PAW pipeline was to have a separate row for each group member. This is what I mean by a "redundant" protein summary. Protein group number format and a text column to denote redundant additional group members are needed to make the table structure obvious. Simple tab-delimited text files do not support tree-like views where items (protein groups) can be expanded or collapsed. These can be used in GUI table viewers but that is another topic. The peptide summaries are more non-redundant in that each protein group is represented by the integral protein group number (the protein group number can be used to relate the peptide and protein tables to each other).
 
 The grouped protein and peptide summaries are designed for quantification in shotgun proteomics experiments. Getting good quantitative results is extremely dependent on how peptides that map to multiple proteins (shared peptides) are handled. Consider two indistinguishable proteins. That means that each peptide maps to the same two sequences in the FASTA file. Each peptide is a shared peptide in the FASTA file context. The context for thinking about whether a peptide maps to more than on protein changes after grouping indistinguishable peptide sets and removing subsets. The context for shared and unique needs to be changed to the set of proteins in the parsimonious results list. Most peptides in protein groups can become unique in the new context. There can still be peptides that are shared between protein groups (including groups with one member). We still have to know what to do with the information for the re-defined shared peptides. We can exclude them or try to somehow split their information between the protein groups that contain them.
 
@@ -260,13 +260,13 @@ The grouped protein summary file has each protein/protein group/protein family r
 
 ## Protein identification overview
 
-The number of proteins detected by the Comet/PAW processing after grouping and removal of contaminants (common contaminants and keratins) was 2,262 with a two peptide per protein requirement. The number reported in (**Ref-1**) was 2694 but appears to allow single peptide per protein IDs. The S1 tab of the Supplemental file `pr8b00416_si_002.xlsx` can be used to estimate what the protein count would have been with two peptides per protein and the number is somewhere in the 1800 to 1900 range. This is pretty impressive without having a proper sea lion protein database. From the S1 table, some idea of the total number of confident PSMs identified can be obtained by summing counts from all cells. The result is about 111 thousand PSMs. A similar sum of the PAW results file is 233 thousand. There are roughly twice as many PSMs identified with the Comet/PAW processing compared to the processing in (**Ref-1**). The non-species specific FASTA file, the mass calibrations issues, different search engine and post processing, and exclusion of semi-trpytic peptides all contribute to the lower identification number. Interestingly, such a large increase in PSMs had a much smaller effect at the protein level. Wide dynamic range proteomes like urine will have most additional lower abundance PSM identifications mapping to the smaller number of abundant proteins.
+The number of proteins detected by the Comet/PAW processing after grouping and removal of contaminants (common contaminants and keratins) was 2,262 with a two peptide per protein requirement. The number reported in (**Ref-1**) was 2694 but appears to allow single peptide per protein IDs. The S1 tab of the Supplemental file `pr8b00416_si_002.xlsx` can be used to estimate what the protein count would have been with two peptides per protein and the number is somewhere in the 1800 to 1900 range. This is pretty impressive without having a proper sea lion protein database. From the S1 table, some idea of the total number of confident PSMs identified can be obtained by summing counts from all cells. The result is about 111 thousand PSMs. A similar sum of the PAW results file is 233 thousand. There are roughly twice as many PSMs identified with the Comet/PAW processing compared to the processing in (**Ref-1**). The non-species specific FASTA file, the mass calibrations issues, different search engine and post processing, and exclusion of semi-trpytic peptides all contribute to the lower identification number. Interestingly, such a large increase in PSMs had a much smaller effect at the protein level. Wide dynamic range proteomes like urine will have most additional lower abundance PSM identifications mapping to highly abundant proteins.
 
-This leads into a class of common questions explored in most proteomics studies. Namely, how consistent are the proteomics results across the samples? This is a valid question nearly always answered in an invalid way. One way to sneak up on the answer to this question is to ask how frequently was each protein seen across the 19 samples (19 out of 19, 18 out of 19, etc.). We can tabulate the number of proteins identified in given number of samples and make a plot:
+This leads into a class of common questions explored in most proteomics studies. Namely, how consistent are the proteomics results between the samples? This is a valid question nearly always answered in an invalid way. One way to sneak up on the answer to this question for this experiment is to ask how frequently was each protein seen across the 19 samples (19 out of 19, 18 out of 19, etc.). We can tabulate the number of proteins identified in given number of samples and make a plot:
 
 ![dist_by_protein](images/dist_by_proteins.png)
 
-We have 190 proteins out of 2262 (8%) that were seen in all 19 samples. That sure seems low. We have large numbers of proteins in all of the categories from 19/19 down to 1/19. This looks like reproducibility of the proteomics results across the samples is a total disaster. Any Venn diagram shown in any proteomics publication is based on counting each protein ID as an equal item. That over-represents low abundance proteins and dramatically under-represents abundant proteins.
+We have 190 proteins out of 2262 (8%) that were seen in all 19 samples. That sure seems low. We have large numbers of proteins in all of the categories from 19/19 down to 1/19. This looks like reproducibility of the proteomics results across the samples is a TOTAL DISASTER. Any Venn diagram shown in any proteomics publication is based on counting each protein ID as an equal item. That over-represents low abundance proteins and dramatically under-represents abundant proteins.
 
 We can instead sum up the spectral counts for the proteins in each category and plot those numbers:
 
@@ -286,7 +286,7 @@ The main notebook for [DE testing with edgeR](https://pwilmart.github.io/TMT_ana
 
 The publication discussed proteins of interest using human gene symbols obtained by mapping the seal or walrus sequences to human orthologs. The scripts in the [PAW_BLAST](https://github.com/pwilmart/PAW_BLAST.git) repository can take a list of identified proteins, make a subset FASTA file, and BLAST that against a better annotated protein database (like the canonical human reference proteome) to find orthologs. That was done for the 2262 identified proteins. The results of the ortholog mapping were also added to the main spreadsheet.
 
-When working with less common species ortholog mapping will probably be needed for any functional or pathway analyses. When going from one well studied organism to another well studied organism (like mouse to human), accession mapping tools may exist. For most non-model species there may not be such an option. The actual protein sequences in the FASTA file can be used to find the orthologs. There are two choices: try to find the orthologs for all proteins in the FASTA file and make a new FASTA file with extra ortholog information added to the FASTA header lines. That can work well if the databases are minimally redundant (think one gene, one protein) so mostly one-to-one mapping would be expected. The other option is to do the searches with the original FASTA file, do the protein inference to get a simplified list of proteins present in the samples, and find the orthologs to the identified proteins. We did the later here because the starting FASTA file was larger and not minimally redundant. We will get a cleaner set of sea lion proteins after protein inference and grouping so the ortholog mapping will be more straightforward.
+When working with less common species, ortholog mapping will probably be needed for any functional or pathway analyses. When going from one well studied organism to another well studied organism (like mouse to human), accession mapping tools may exist. For most non-model species there may not be such an option. The actual protein sequences in the FASTA file can be used to find the orthologs. There are two choices: try to find the orthologs for all proteins in the FASTA file and make a new FASTA file with extra ortholog information added to the FASTA header lines. That can work well if the databases are minimally redundant (think one gene, one protein) so mostly one-to-one mapping would be expected. The other option is to do the searches with the original FASTA file, do the protein inference to get a simplified list of proteins present in the samples, and find the orthologs to the identified proteins. We did the later here because the starting FASTA file was larger and not minimally redundant. We will get a cleaner set of sea lion proteins after protein inference and grouping so the ortholog mapping will be more straightforward.
 
 Another script ([`add_protein_annotations_6.py`](https://github.com/pwilmart/annotations.git)) can parse flat text files downloaded from UniProt for Swiss-Prot entries to add some extra annotation information to results sheets. Annotations for human proteins were added to the main results spreadsheet using the human ortholog accessions. Finally, some formatting of the sheet was done and descriptions of the main sheet columns were added.
 
