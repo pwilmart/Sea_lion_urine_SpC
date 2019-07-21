@@ -74,7 +74,7 @@ When semi-tryptic searches are used, a given peptide sequence can be fully-trypt
 
 ---
 
-### Delta mass windows
+## Delta mass windows
 
 The first step in the `histo_GUI.py` processing is to make delta mass histograms. Comet/PAW is designed for wider tolerance searches so that accurate mass can be used to distinguish correct matches from incorrect matches (using the decoy sequences as noise proxies). We expect most correct matches to have accurate masses and have the measured masses be within a few PPM of the calculated peptide sequence masses. That will be a sharp peak in the delta mass histogram near zero Da. We used plus/minus 1.25 Da. We will plot a histogram for the full range, for the region around zero Da, and for a region around one Da. We will do separate delta mass histograms by charge state. This is the 2+ ions:
 
@@ -104,7 +104,7 @@ And, finally, the 4+ ions:
 
 ---
 
-### Conditional score histograms
+## Conditional score histograms
 
 ### Zero Da delta mass windows
 
@@ -169,11 +169,11 @@ And the 4+ peptides for the one Da window:
 ![scores_none_4plus_noMod](images/scores_none_4plus_noMod.png)
 ![scores_none_4plus_oxMet](images/scores_none_4plus_oxMet.png)
 
-Things are generally similar to the other subclass distributions, but the overall numbers of correct matches is smaller. We have a considerably more noise (larger relative red distributions compared to the blue), so we have to set higher score cutoffs to keep the 1% FDR. For this data, we have quite a few "extra" matches that we would have lost if we had strictly required accurate masses.
+Things are generally similar to the other subclass distributions, but the overall numbers of correct matches are usually smaller. We have a considerably more noise (larger relative red distributions compared to the blue), so we have to set higher score cutoffs to keep the 1% FDR. For this data, we have quite a few "extra" matches that we would have lost if we had strictly required accurate masses.
 
 ---
 
-### PSM statistics
+## PSM statistics
 
 The PAW filtering requires that peptides be at least 7 amino acids in length. Charge states of 2+, 3+, and 4+ are allowed for high resolution data. Each peptide subclass is filtered independently to a 1% FDR so that an overall dataset FDR of 1% can be obtained. We can tally the numbers of net correct matches in the various subclasses to see what the data characteristics are. There were 1,262,185 MS2 scans in total. There were 248,853 scans that exceeded the discriminant score thresholds. The overall ID rate was 19.7%
 
@@ -206,5 +206,26 @@ State|Scans|Fraction
 ------|-----|--------
 no Mods|209,580|85.2%
 ox Met|36,373|14.8%
+
+We have 3/4 of the identifications falling inside of the zero Da delta mass window. Surprisingly, we have more identifications without an accurate mass than there were in the one Da delta mass window. There are mostly 2+ and 3+ peptides with far fewer 4+ peptides. This is pretty typical for trypsin digests. We have appreciable numbers of semi-trpytic and oxidized Met identifications. The concern with not including these peptide forms in the search settings is that their fraction per sample may not be the same between conditions. Ignoring them could introduce some bias into the measurements.  
+
+---
+
+## Protein inference
+
+The PAW pipeline implements a very basic parsimony framework. Proteins having indistinguishable peptide sets (considering I and L residues indistinguishable) are grouped together. Proteins with peptide sets that are formal subsets of other protein peptide sets are removed. The protein mapping and peptide set processing are done experiment wide. The minimum number of distinct peptides per protein (almost always two) criterion is applied per sample (not experiment wide).
+
+**Proteins at each step (includes contaminants)**
+
+Step|Proteins|Decoys
+----|--------|------
+Raw mapping|15,533|
+Excluding one peptide per protein|6,434|
+After redundant grouping|3,687|
+After subset removal|2,803|
+2 peptides/protein/sample|2,407|21
+After homology grouping|2,336|21
+
+We see that the 1% PSM FDR cutoff resulted in a similar 1% protein FRD estimate. The protein FDR depends on the number of incorrect PSMs per sample, the effective database size, and the number of samples in the experiment. The PAW pipeline does not use ad hoc, untested, heuristic protein ranking functions. The protein FDR is a consequence of the number of incorrect PSMs being accepted. To make the protein list more or less strict, one would need to change the PSM score thresholds and redo the protein inference.
 
 ---
