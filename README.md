@@ -27,7 +27,11 @@ The data is from a recent study (**Ref-1**) where urine samples from California 
 
 The goal here is to demonstrate how to analyze shotgun proteomics data with a modern open source pipeline and test for differential expression with label-free spectral counting quantification. The [PAW pipeline](https://github.com/pwilmart/PAW_pipeline.git) (**Ref-2**) uses MSConvert from [Proteowizard toolkit](http://proteowizard.sourceforge.net/) (**Ref-3**) to convert Thermo RAW files into MS2 format files (**Ref-4**). Database searching is done with the [Comet search engine]() (**Ref-5**). Python scripts process the Comet results using an interactive, visual approach to controlling PSM errors. Protein inference uses basic and extended parsimony logic to maximize the quantitative information content from shotgun data.   
 
-The PAW pipeline has particular strengths for TMT labeling experiments, but was originally developed for large-scale spectral counting (**Ref 6**) studies. Many examples of TMT data analysis can be found [**here**](https://github.com/pwilmart/TMT_analysis_examples.git). An analysis of a very large spectral counting study can be found [**here**](https://github.com/pwilmart/Smith_SpC_2018.git). The Bioconductor package edgeR (**Ref-7**) will be used for differential expression statistical testing.
+The PAW pipeline has particular strengths for TMT labeling experiments, but was originally developed for large-scale spectral counting (**Ref-6**) studies. Many examples of TMT data analysis can be found [**here**](https://github.com/pwilmart/TMT_analysis_examples.git). An analysis of a very large spectral counting study can be found [**here**](https://github.com/pwilmart/Smith_SpC_2018.git). The Bioconductor package edgeR (**Ref-7**) will be used for differential expression statistical testing.
+
+---
+
+## References
 
 > **1.** Neely, B.A., Prager, K.C., Bland, A.M., Fontaine, C., Gulland, F.M. and Janech, M.G., 2018. Proteomic Analysis of Urine from California Sea Lions (Zalophus californianus): a Resource for Urinary Biomarker Discovery. Journal of proteome research, 17(9), pp.3281-3291. [**link**](https://pubs.acs.org/doi/abs/10.1021/acs.jproteome.8b00416)
 
@@ -39,9 +43,9 @@ The PAW pipeline has particular strengths for TMT labeling experiments, but was 
 
 > **5.** Eng, J.K., Jahan, T.A. and Hoopmann, M.R., 2013. Comet: an open‐source MS/MS sequence database search tool. Proteomics, 13(1), pp.22-24. [**link**](https://onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201200439)
 
-> **6.** Liu, H., Sadygov, R.G. and Yates, J.R., 2004. A model for random sampling and estimation of relative protein abundance in shotgun proteomics. Analytical chemistry, 76(14), pp.4193-4201.
+> **6.** Liu, H., Sadygov, R.G. and Yates, J.R., 2004. A model for random sampling and estimation of relative protein abundance in shotgun proteomics. Analytical chemistry, 76(14), pp.4193-4201. [**link**](https://pubs.acs.org/doi/abs/10.1021/ac0498563)
 
-> **7.** Robinson, M.D., McCarthy, D.J. and Smyth, G.K., 2010. edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. Bioinformatics, 26(1), pp.139-140.
+> **7.** Robinson, M.D., McCarthy, D.J. and Smyth, G.K., 2010. edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. Bioinformatics, 26(1), pp.139-140. [**link**](https://academic.oup.com/bioinformatics/article/26/1/139/182458)
 
 ---
 
@@ -278,7 +282,7 @@ There will always be more detectible proteins than quantifiable proteins. Like m
 
 When checking some basic results metrics like the number of proteins identified per sample or the total number of PSMs (at 1% FDR) per sample, some of the samples had atypical values. A [QC check for outlier samples notebook](https://pwilmart.github.io/TMT_analysis_examples/PXD009019_QC_check.html) was used to see how the different samples looked with a variety of QC metrics. Three of the lepto samples ended up being excluded. Two control samples were unusual but were kept in the analysis.
 
-The main notebook for [DE testing with edgeR](https://pwilmart.github.io/TMT_analysis_examples/PXD009019_SpC_DE.html) can be viewed in detail. Briefly, there were 669 proteins tested from 8 control samples and 8 lepto samples. Of the 669 proteins, 410 were differentially expressed at a Benjamini-Hochberg corrected FDR of 0.05. There were 217 up-regulated in lepto proteins and 193 down-regulated in lepto proteins. This is a little larger than the 316 candidates in the publication and more evenly balanced between up and down expression. TMM normalization is a pretty good normalization method for these types of experiments. The results of the edgeR testing were written to a file and added back to the main proteomics result file (`PXD009019_grouped_protein_summary_9.xlsx`)
+The main notebook for [DE testing with edgeR](https://pwilmart.github.io/TMT_analysis_examples/PXD009019_SpC_DE.html) can be viewed in detail. Briefly, there were 669 proteins tested from 8 control samples and 8 lepto samples. Of the 669 proteins, 410 were differentially expressed at a Benjamini-Hochberg corrected FDR of 0.05. There were 217 up-regulated in lepto proteins and 193 down-regulated in lepto proteins. This is a little larger than the 316 candidates in the publication and more evenly balanced between up and down expression. [TMM normalization](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-3-r25) is a pretty good normalization method for these types of experiments. The results of the edgeR testing were written to a file and added back to the main proteomics result file (`PXD009019_grouped_protein_summary_9.xlsx`)
 
 The publication discussed proteins of interest using human gene symbols obtained by mapping the seal or walrus sequences to human orthologs. The scripts in the [PAW_BLAST](https://github.com/pwilmart/PAW_BLAST.git) repository can take a list of identified proteins, make a subset FASTA file, and BLAST that against a better annotated protein database (like the canonical human reference proteome) to find orthologs. That was done for the 2262 identified proteins. The results of the ortholog mapping were also added to the main spreadsheet.
 
@@ -294,4 +298,4 @@ Once all of the results were present in one spreadsheet, it was easy to check th
 
 A recently sequenced California sea lion genome was used to redo sea lion urine samples from a previously published study (data at PXD009019) with the Comet/PAW pipeline. Database prep and database searching was detailed. The need for semi-trpytic searches in biofluids was explored. The PAW pipeline is visual and also aids in quality control. We saw that the data was done at two times and that the mass calibration was not the same. The flexible way that the PAW pipeline uses accurate mass was demonstrated. A greatly increased number of PSMs were identified at the same FDR. How to determine what subset of the data is quantifiable was demonstrated. Jupyter notebooks, R, edgeR, and ggplot2 were used to find the differential expression candidates. How to work with less well annotated genomes was also discussed.
 
--Phil W., July 21, 2019 
+-Phil W., July 21, 2019
