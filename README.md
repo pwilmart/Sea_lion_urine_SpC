@@ -62,6 +62,8 @@ Comet was configured for a semi-tryptic search using the FASTA file described ab
 - variable oxidation of Met
 - static alkylation of Cys
 
+The full list of Comet parameters can be found in the `comet.params` file.
+
 The top-hit summaries are generated with the script `sqt_converter.py`. **This step is currently extremely slow.** The script only uses a single core. Comet (version 2016.3) does not list all proteins that peptides match to. It lists the first one (which might be the only one) and the number of additional matches. When the database is larger, or has higher degrees of peptide redundancy, peptide lookups take longer. Fully tryptic peptide lookup is fast since that is done using a dictionary of a theoretical digest of the FASTA file. Semi-tryptic sequence use a slower brute force scan of all protein sequences.
 
 After a few days on my iMac, the top-hit summary files could be loaded into the [`histo_GUI.py`](https://github.com/pwilmart/PAW_pipeline/blob/master/docs/histo_GUI.md) application. It is worth pointing out that a top-hit summary does not mean one sequence per MS2 spectrum. There can be different sequences that tie on score. The `histo_GUI.py` script separates peptides in various subclasses by:
@@ -228,4 +230,48 @@ After homology grouping|2,336|21
 
 We see that the 1% PSM FDR cutoff resulted in a similar 1% protein FRD estimate. The protein FDR depends on the number of incorrect PSMs per sample, the effective database size, and the number of samples in the experiment. The PAW pipeline does not use ad hoc, untested, heuristic protein ranking functions. The protein FDR is a consequence of the number of incorrect PSMs being accepted. To make the protein list more or less strict, one would need to change the PSM score thresholds and redo the protein inference.
 
+The `PAW_results.py` script produces several output files:
+
+File(s)|Count|Description
+----|-----|-----------
+2017-X-Y_CSL_Z_redux_peptide_results_9.txt|19|Detailed PSM reports
+peptide_summary_9.txt|1|Peptides associated with proteins
+protein_summary_9.txt|1|Redundant proteins with basic parsimony
+grouped_peptide_summary_9.txt|1|Peptides associated with grouped proteins
+grouped_protein_summary_9.txt|1|Non-redundant proteins with extended parsimony
+
+The detailed PSM-level reports have search scores, masses, etc. for each PSM associated with the final parsimonious protein list (it is not all PSMs - those are in the filtered files folder which is not in the repository).
+
+The basic peptide and protein summaries are better for information about identifications. A question faced by programmers for any proteomics result report is how to represent protein group members. Protein groups (in a basic parsimony context) are proteins indistinguishable based on their observed peptides. Some proteins ony have peptides that map back to a single entry in the FASTA file. Those are trivial cases since protein groups with single members are obvious single rows in any output table. If protein groups have more than one member, then there are choices to consider. A single representative member of the group can be used to represent the group so that each protein or protein group is a single row in an output table. That shifts the question to which protein to use as the representative one. Another choice is to wrap multiple bits of information into each cell using some scheme based on separator characters. That always complicates downstream data parsing as cells have to be tested for single items or multiple items (and then also a question of what to do about multiple items...). The choice that I made was to have a separate row for each group member. This is what I mean by a "redundant" protein summary. Protein group number format and a text column to denote redundant additional group members are needed to make the table structure obvious. Simple tab-delimited text files do not support tree-like views where items (protein groups) can be expanded or collapsed. These can be used in GUI table viewers but that is another topic. The peptide summaries are more non-redundant in that each protein group is represented by the integral protein group number (the protein group number can be used to relate the peptide and protein tables to each other).
+
+The grouped protein and peptide summaries are designed for quantification in shotgun proteomics experiments. Getting good quantitative results is extremely dependent on how peptides that map to multiple proteins (shared peptides) are handled. Consider two indistinguishable proteins. That means that each peptide maps to the same two sequences in the FASTA file. Each peptide is a shared peptide in the FASTA file context. The context for thinking about whether a peptide maps to more than on protein changes after grouping indistinguishable peptide sets and removing subsets. The context for shared and unique needs to be changed to the set of proteins in the parsimonious results list. Most peptides in protein groups can become unique in the new context. There can still be peptides that are shared between protein groups (including groups with one member). We still have to know what to do with the information for the re-defined shared peptides. We can exclude them or try to somehow split their information between the protein groups that contain them.
+
+The PAW pipeline splits the spectral counts for shared peptides based on relative unique peptide counts. This work okay when there are not too many shared peptide counts. We really need the number of shared counts that we are splitting to be "relatively" small compared to the unique counts. If the shared counts become dominant, it may be safer to combine protein groups into protein families and sacrifice some quantitative resolution for quantitative accuracy. That is what the protein grouping step does.
+
+The protein grouping is an extension of the basic parsimony logic. A useful rule of thumb in proteomics is to require two peptides per protein. See [this blog post](https://pwilmart.github.io/blog/2019/03/10/MQ-performance) for a deeper dive into why the two peptide rule works. Two independent pieces of evidence for a protein is unlikely to happen by chance. A single incorrect peptide can have an atypical high score. There is never any guarantee that a single peptide is correct (yes, high incorrect scores are less likely but not impossible). The extended parsimony idea is that we need at least two unique peptides to keep proteins from being grouped together. We can extend the definitions of identical peptide sets to nearly identical sets (and similar thinking for subsets). There are protein forms in several established protein families (actins, tubulins, histones, keratins, etc.) that have mostly the same protein sequence. They can have small numbers of peptides that are not identical, but most of the peptides will be the same. We need to capture these cases and combine them, too. They may have sufficient unique peptide evidence to support identification of individual family members, but the total weight of the shared peptides is so large that trying to split them would be a bad idea. More details on the protein grouping algorithm can be found in [this thesis](https://digitalcollections.ohsu.edu/concern/etds/c534fp149).
+
+The grouped protein summary file has each protein/protein group/protein family represented in a single row (a non-redundant table). The context for shared and unique peptides get updated for the new extended parsimonious protein list. The grouped protein summaries are typically used for further quantitative processing. The corresponding peptide summaries are similar to the non-grouped ones. There are some compromises to grouping. Some unique before grouping peptides get lumped in with the shared peptides for the protein family. Thus, a protein family will be represented by a protein sequence and a set of peptides where some of the peptides might not be present in that representative protein sequence. Ambiguity seems to lead to ambiguous solutions.      
+
 ---
+
+## Protein identification overview
+
+The number of proteins detected by the Comet/PAW processing after grouping and removal of contaminants (common contaminants and keratins) was 2,262 with a two peptide per protein requirement. The number reported in (**Ref-1**) was 2694 but appears to allow single peptide per protein IDs. The S1 tab of the Supplemental file `pr8b00416_si_002.xlsx` can be used to estimate what the protein count would have been with two peptides per protein and the number is somewhere in the 1800 to 1900 range. This is pretty impressive without having a proper sea lion protein database. From the S1 table, some idea of the total number of confident PSMs identified can be obtained by summing counts from all cells. The result is about 111 thousand PSMs. A similar sum of the PAW results file is 233 thousand. There are roughly twice as many PSMs identified with the Comet/PAW processing compared to the processing in (**Ref-1**). The non-species specific FASTA file, the mass calibrations issues, different search engine and post processing, and exclusion of semi-trpytic peptides all contribute to the lower identification number. Interestingly, such a large increase in PSMs had a much smaller effect at the protein level. Wide dynamic range proteomes like urine will have most additional lower abundance PSM identifications mapping to the smaller number of abundant proteins.
+
+This leads into a class of common questions explored in most proteomics studies. Namely, how consistent are the proteomics results across the samples? This is a valid question nearly always answered in an invalid way. One way to sneak up on the answer to this question is to ask how frequently was each protein seen across the 19 samples (19 out of 19, 18 out of 19, etc.). We can tabulate the number of proteins identified in given number of samples and make a plot:
+
+![dist_by_protein](images/dist_by_proteins.png)
+
+We have 190 proteins out of 2262 (8%) that were seen in all 19 samples. That sure seems low. We have large numbers of proteins in all of the categories from 19/19 down to 1/19. This looks like reproducibility of the proteomics results across the samples is a total disaster. Any Venn diagram shown in any proteomics publication is based on counting each protein ID as an equal item. That over-represents low abundance proteins and dramatically under-represents abundant proteins.
+
+We can instead sum up the spectral counts for the proteins in each category and plot those numbers:
+
+![dist_by_SpC](images/dist_by_SpC.png)
+
+This view is rather different. Those 190 proteins (just 8% of the total) account for 61% of the total SpC values. Now the reproducibility of the proteomics methods looks pretty darn good. Spectral counting also over-counts low abundance proteins and under-counts abundant proteins, so the reality is actually better than this plot suggests. If we had used intensity-based quantities (such as MS1 features), we would have an even larger fraction of the total signal seen in all samples.
+
+---
+
+## Quantitative data prepare
+
+ 
