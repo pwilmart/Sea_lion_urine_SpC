@@ -236,6 +236,12 @@ After homology grouping|2,336|21
 
 We see that the 1% PSM FDR cutoff resulted in a similar 1% protein FRD estimate. The protein FDR depends on the number of incorrect PSMs per sample, the effective database size, and the number of samples in the experiment. The PAW pipeline does not use ad hoc, untested, heuristic protein ranking functions. The protein FDR is a consequence of the number of incorrect PSMs being accepted. To make the protein list more or less strict, one would need to change the PSM score thresholds and redo the protein inference.
 
+---
+
+## Files in the repository
+
+The entire analysis folder is 40 GB. This has RAW files, converted files from MSConvert, MS2 files for search input, SQT files from Comet, top hit summary text files, filtered MS2, SQT, and TXT files, and the results files. There are also log files written for each pipeline step. Only the results files are in the repository due to space considerations.
+
 The `PAW_results.py` script produces several output and log files:
 
 File(s)|Count|Description
@@ -245,6 +251,8 @@ peptide_summary_9.txt|1|Peptides associated with proteins
 protein_summary_9.txt|1|Redundant proteins with basic parsimony
 grouped_peptide_summary_9.txt|1|Peptides associated with grouped proteins
 grouped_protein_summary_9.txt|1|Non-redundant proteins with extended parsimony
+
+The `PAW_results.log` file has the protein inference details. The `PAW_protein_grouper.log` file has the extended parsimony grouping details.
 
 The detailed PSM-level reports have search scores, masses, etc. for each PSM associated with the final parsimonious protein list (it is not all PSMs - those are in the filtered files folder which is not in the repository).
 
@@ -256,7 +264,9 @@ The PAW pipeline splits the spectral counts for shared peptides based on relativ
 
 The protein grouping is an extension of the basic parsimony logic. A useful rule of thumb in proteomics is to require two peptides per protein. See [this blog post](https://pwilmart.github.io/blog/2019/03/10/MQ-performance) for a deeper dive into why the two peptide rule works. Two independent pieces of evidence for a protein is unlikely to happen by chance. A single incorrect peptide can have an atypical high score. There is never any guarantee that a single peptide is correct (yes, high incorrect scores are less likely but not impossible). The extended parsimony idea is that we need at least two unique peptides to keep proteins from being grouped together. We can extend the definitions of identical peptide sets to nearly identical sets (and similar thinking for subsets). There are protein forms in several established protein families (actins, tubulins, histones, keratins, etc.) that have mostly the same protein sequence. They can have small numbers of peptides that are not identical, but most of the peptides will be the same. We need to capture these cases and combine them, too. They may have sufficient unique peptide evidence to support identification of individual family members, but the total weight of the shared peptides is so large that trying to split them would be a bad idea. More details on the protein grouping algorithm can be found in [this thesis](https://digitalcollections.ohsu.edu/concern/etds/c534fp149).
 
-The grouped protein summary file has each protein/protein group/protein family represented in a single row (a non-redundant table). The context for shared and unique peptides get updated for the new extended parsimonious protein list. The grouped protein summaries are typically used for further quantitative processing. The corresponding peptide summaries are similar to the non-grouped ones. There are some compromises to grouping. Some unique before grouping peptides get lumped in with the shared peptides for the protein family. Thus, a protein family will be represented by a protein sequence and a set of peptides where some of the peptides might not be present in that representative protein sequence. Ambiguity seems to lead to ambiguous solutions.      
+The grouped protein summary file has each protein/protein group/protein family represented in a single row (a non-redundant table). The context for shared and unique peptides get updated for the new extended parsimonious protein list. The grouped protein summaries are typically used for further quantitative processing. The corresponding peptide summaries are similar to the non-grouped ones. There are some compromises to grouping. Some unique before grouping peptides get lumped in with the shared peptides for the protein family. Thus, a protein family will be represented by a protein sequence and a set of peptides where some of the peptides might not be present in that representative protein sequence. Ambiguity seems to lead to ambiguous solutions.
+
+There are also Jupyter notebook files in `ipynb` format and as rendered `HTML` files. The R code from the notebooks has also been saved in `R` script files (can be used in RStudio).     
 
 ---
 
