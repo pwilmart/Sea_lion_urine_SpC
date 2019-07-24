@@ -61,7 +61,7 @@ The PAW pipeline has particular strengths for TMT labeling experiments, but was 
 
 When (**Ref-1**) was published, the California sea lion (taxon = 9704) genome was not available. FASTA files from two related species (Weddell seal and Pacific walrus) were used instead. Part of the motivation for this re-analysis was to use the sea lion genome. The FASTA sequences are available from the NCBI website by searching for taxon id of 9704. Results should be further filtered to the RefSeq entries. There will be around 59,174 sequences that can be downloaded in FASTA format. The FASTA file will have some sequence redundancy. NCBI has recently [added an option](https://www.ncbi.nlm.nih.gov/ipg/docs/about/) to download non-redundant sequence sets. A Python script (`remove_duplicates.py`) is part of the [fasta_utilities](https://github.com/pwilmart/fasta_utilities.git) tools and was used to collapse duplicate sequences and reduce the database to 45,800 sequences. The `add_extras_and_reverse.py` tool was used to add sequences for the retention time standard and a couple of spike-in proteins available from the [PXD009019](https://www.ebi.ac.uk/pride/archive/projects/PXD009019) archive. The final database (with the 3 extra sequences, 179 common contaminants, and sequence-reversed versions of all) was 91,964 sequences.
 
-## PAW processing <a name="PAW_processing"></a>
+## <a name="PAW_processing"></a> PAW processing
 
 The README.md file in [PAW_pipeline](https://github.com/pwilmart/PAW_pipeline.git) repository describes the pipeline in detail including installation instructions. The first step is to convert the Thermo RAW files to MS2-format files using [`msconvert_GUI.py`](https://github.com/pwilmart/PAW_pipeline/blob/master/docs/msconvert_GUI.md). The default settings were used with MS2 selected for the data to extract. There were an average of 66,431 MS2 scans per LC run (SD = 4,845; max = 71,966; min = 50,459) for a total dataset size of 1,262,185 MS2 scans.
 
@@ -90,7 +90,7 @@ When semi-tryptic searches are used, a given peptide sequence can be fully-trypt
 
 ---
 
-## Delta mass windows <a name="accurate_mass"></a>
+## <a name="accurate_mass"></a> Delta mass windows
 
 The first step in the `histo_GUI.py` processing is to make delta mass histograms. Comet/PAW is designed for wider tolerance searches so that accurate mass can be used to distinguish correct matches from incorrect matches (using the decoy sequences as noise proxies). We expect most correct matches to have accurate masses and have the measured masses be within a few PPM of the calculated peptide sequence masses. That will be a sharp peak in the delta mass histogram near zero Da. We used plus/minus 1.25 Da. We will plot a histogram for the full range, for the region around zero Da, and for a region around one Da. We will do separate delta mass histograms by charge state. This is the 2+ ions:
 
@@ -120,7 +120,7 @@ And, finally, the 4+ ions:
 
 ---
 
-## Conditional score histograms <a name="score_histos"></a>
+## <a name="score_histos"></a> Conditional score histograms
 
 ### Zero Da delta mass windows
 
@@ -189,7 +189,7 @@ Things are generally similar to the other subclass distributions, but the overal
 
 ---
 
-## PSM statistics <a name="psm_stats"></a>
+## <a name="psm_stats"></a> PSM statistics
 
 The PAW filtering requires that peptides be at least 7 amino acids in length. Charge states of 2+, 3+, and 4+ are allowed for high resolution data. Each peptide subclass is filtered independently to a 1% FDR so that an overall dataset FDR of 1% can be obtained. We can tally the numbers of net correct matches in the various subclasses to see what the data characteristics are. There were 1,262,185 MS2 scans in total. There were 248,853 scans that exceeded the discriminant score thresholds. The overall ID rate was 19.7%
 
@@ -227,7 +227,7 @@ We have 3/4 of the identifications falling inside of the zero Da delta mass wind
 
 ---
 
-## Protein inference <a name="protein_inference"></a>
+## <a name="protein_inference"></a> Protein inference
 
 The PAW pipeline implements a very basic parsimony framework. Proteins having indistinguishable peptide sets (considering I and L residues indistinguishable) are grouped together. Proteins with peptide sets that are formal subsets of other protein peptide sets are removed. The protein mapping and peptide set processing are done experiment wide. The minimum number of distinct peptides per protein (almost always two) criterion is applied per sample (not experiment wide).
 
@@ -246,7 +246,7 @@ We see that the 1% PSM FDR cutoff resulted in a similar 1% protein FRD estimate.
 
 ---
 
-## Files in the repository <a name="repo_files"></a>
+## <a name="repo_files"></a> Files in the repository
 
 The entire analysis folder is 40 GB. This has RAW files, converted files from MSConvert, MS2 files for search input, SQT files from Comet, top hit summary text files, filtered MS2, SQT, and TXT files, and the results files. There are also log files written for each pipeline step. Only the results files are in the repository due to space considerations.
 
@@ -278,7 +278,7 @@ There are also Jupyter notebook files in `ipynb` format and as rendered `HTML` f
 
 ---
 
-## Protein identification overview <a name="ID_overview"></a>
+## <a name="ID_overview"></a> Protein identification overview
 
 The number of proteins detected by the Comet/PAW processing after grouping and removal of contaminants (common contaminants and keratins) was 2,262 with a two peptide per protein requirement. The number reported in (**Ref-1**) was 2694 but appears to allow single peptide per protein IDs. The S1 tab of the Supplemental file `pr8b00416_si_002.xlsx` can be used to estimate what the protein count would have been with two peptides per protein and the number is somewhere in the 1800 to 1900 range. This is pretty impressive without having a proper sea lion protein database. From the S1 table, some idea of the total number of confident PSMs identified can be obtained by summing counts from all cells. The result is about 111 thousand PSMs. A similar sum of the PAW results file is 233 thousand. There are roughly twice as many PSMs identified with the Comet/PAW processing compared to the processing in (**Ref-1**). The non-species specific FASTA file, the mass calibrations issues, different search engine and post processing, and exclusion of semi-trpytic peptides all contribute to the lower identification number. Interestingly, such a large increase in PSMs had a much smaller effect at the protein level. Wide dynamic range proteomes like urine will have most additional lower abundance PSM identifications mapping to highly abundant proteins.
 
@@ -296,13 +296,13 @@ This view is rather different. Those 190 proteins (just 8% of the total) account
 
 ---
 
-## Quantitative data prep <a name="quant_prep"></a>
+## <a name="quant_prep"></a> Quantitative data prep
 
 There will always be more detectible proteins than quantifiable proteins. Like most quantitative datasets, what determines how low in abundance you can quantify is the missing data. As we saw above, the abundant proteins account for the bulk of the data. The converse is that the low abundance proteins account for the bulk of the missing data. We can compute a couple of values to help determine where to draw the line. We can compute the average SpC across the 19 samples and sort proteins from high average to low average. We can then compute a running missing data fraction. We do that by counting cells with zeros out of the total count of cells as we go down the table. If we plot the missing fraction versus the average SpC we can see when we get a sharp increase in missing data and set an average SpC cutoff. We did that in a [missing data and low count cutoff notebook](https://pwilmart.github.io/TMT_analysis_examples/PXD009019_average_missing.html). A value of 2.5 seemed like a good choice. That gave us 669 quantifiable proteins to work with.
 
 When checking some basic results metrics like the number of proteins identified per sample or the total number of PSMs (at 1% FDR) per sample, some of the samples had atypical values. A [QC check for outlier samples notebook](https://pwilmart.github.io/TMT_analysis_examples/PXD009019_QC_check.html) was used to see how the different samples looked with a variety of QC metrics. Three of the lepto samples ended up being excluded. Two control samples were unusual but were kept in the analysis.
 
-## Differential expression results <a name="DE_results"></a>
+## <a name="DE_results"></a> Differential expression results
 
 The main notebook for [DE testing with edgeR](https://pwilmart.github.io/TMT_analysis_examples/PXD009019_SpC_DE.html) can be viewed in detail. Briefly, there were 669 proteins tested from 8 control samples and 8 lepto samples. Of the 669 proteins, 410 were differentially expressed at a Benjamini-Hochberg corrected FDR of 0.05. There were 217 up-regulated in lepto proteins and 193 down-regulated in lepto proteins. This is a little larger than the 316 candidates in the publication and more evenly balanced between up and down expression. [TMM normalization](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-3-r25) is a pretty good normalization method for these types of experiments. The results of the edgeR testing were written to a file and added back to the main proteomics result file (`PXD009019_grouped_protein_summary_9.xlsx`)
 
@@ -316,7 +316,7 @@ Once all of the results were present in one spreadsheet, it was easy to check th
 
 ---
 
-## Summary <a name="summary"></a>
+## <a name="summary"></a> Summary
 
 A recently sequenced California sea lion genome was used to redo sea lion urine samples from a previously published (**Ref-1**) study (data at [PXD009019](https://www.ebi.ac.uk/pride/archive/projects/PXD009019)) with the Comet/PAW pipeline. Database prep and database searching was detailed. The need for semi-trpytic searches in biofluids was explored. The PAW pipeline is visual and also aids in quality control. We saw that the data was done at two times and that the mass calibration was not the same. The flexible way that the PAW pipeline uses accurate mass was demonstrated. A greatly increased number of PSMs were identified at the same FDR. How to determine what subset of the data is quantifiable was demonstrated. Jupyter notebooks, R, edgeR, and ggplot2 were used to find the differential expression candidates. How to work with less well annotated genomes was also discussed.
 
