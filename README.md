@@ -46,16 +46,16 @@ The PAW pipeline has particular strengths for TMT labeling experiments, but was 
 ## Contents
 
 - [Protein database details](#database)
-- [PAW processing](PAW_processing)
-- [Delta mass windows](accurate_mass)
-- [Conditional score histograms](score_histos)
-- [PSM statistics](psm_stats)
-- [Protein inference](protein_inference)
-- [Files in the repository](repo_files)
-- [Protein identification overview](ID_overview)
-- [Quantitative data prep](quant_prep")
-- [Differential expression results](database)
-- [Summary](summary)
+- [PAW processing](#PAW_processing)
+- [Delta mass windows](#accurate_mass)
+- [Conditional score histograms](#score_histos)
+- [PSM statistics](#psm_stats)
+- [Protein inference](#protein_inference)
+- [Files in the repository](#repo_files)
+- [Protein identification overview](#ID_overview)
+- [Quantitative data prep](#quant_prep)
+- [Differential expression results](#DE_results)
+- [Summary](#summary)
 
 ## Protein database details <a name="database"></a>
 
