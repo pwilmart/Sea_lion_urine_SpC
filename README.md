@@ -57,9 +57,11 @@ The PAW pipeline has particular strengths for TMT labeling experiments, but was 
 - [Differential expression results](#DE_results)
 - [Summary](#summary)
 
-## <a name="database"></a> Protein database details 
+## <a name="database"></a> Protein database details
 
-When (**Ref-1**) was published, the California sea lion (taxon = 9704) genome was not available. FASTA files from two related species (Weddell seal and Pacific walrus) were used instead. Part of the motivation for this re-analysis was to use the sea lion genome. The FASTA sequences are available from the NCBI website by searching for taxon id of 9704. Results should be further filtered to the RefSeq entries. There will be around 59,174 sequences that can be downloaded in FASTA format. The FASTA file will have some sequence redundancy. NCBI has recently [added an option](https://www.ncbi.nlm.nih.gov/ipg/docs/about/) to download non-redundant sequence sets. A Python script (`remove_duplicates.py`) is part of the [fasta_utilities](https://github.com/pwilmart/fasta_utilities.git) tools and was used to collapse duplicate sequences and reduce the database to 45,800 sequences. The `add_extras_and_reverse.py` tool was used to add sequences for the retention time standard and a couple of spike-in proteins available from the [PXD009019](https://www.ebi.ac.uk/pride/archive/projects/PXD009019) archive. The final database (with the 3 extra sequences, 179 common contaminants, and sequence-reversed versions of all) was 91,964 sequences.
+When (**Ref-1**) was published, the California sea lion (taxon = 9704) genome was not available. FASTA files from two related species (Weddell seal and Pacific walrus) were used instead. Part of the motivation for this re-analysis was to use the sea lion genome. The FASTA sequences are available from the NCBI website by searching for taxon id of 9704. Results should be further filtered to the RefSeq entries. There will be around 59,174 sequences that can be downloaded in FASTA format. The FASTA file will have some sequence redundancy. NCBI has recently [added an option](https://www.ncbi.nlm.nih.gov/ipg/docs/about/) to download non-redundant sequence sets (not recommended, see below). A Python script (`remove_duplicates.py`) is part of the [fasta_utilities](https://github.com/pwilmart/fasta_utilities.git) tools and was used to collapse duplicate sequences and reduce the database to 45,800 sequences. The `add_extras_and_reverse.py` tool was used to add sequences for the retention time standard and a couple of spike-in proteins available from the [PXD009019](https://www.ebi.ac.uk/pride/archive/projects/PXD009019) archive. The final database (with the 3 extra sequences, 179 common contaminants, and sequence-reversed versions of all) was 91,964 sequences.
+
+> The NCBI "Identical Protein Groups" download options has some unexpected side effects. Since I was interested in the California Sea lion, and had filtered NCBI for RefSeq only for taxonomy number 9704, I assumed that the non-redundant download would have the FASTA headers for Sea lion. It does not. It probably has the first header element in the full nr database for each sequence. When a single, unique protein sequence is added to the nr collection, all of the different FASTA headers associated with that sequence are joined (with a Control-A character as a separator) into a very large FASTA header line. There is some "species pecking order" to this process. These non-redundant sequence collections will have the correct set of non-redundant protein sequences, but the FASTA headers (accessions and descriptions) will be an interesting hodgepodge of species.
 
 ## <a name="PAW_processing"></a> PAW processing
 
@@ -225,6 +227,8 @@ ox Met|36,373|14.8%
 
 We have 3/4 of the identifications falling inside of the zero Da delta mass window. Surprisingly, we have more identifications **without an accurate mass** than there were in the one Da delta mass window. There are mostly 2+ and 3+ peptides with far fewer 4+ peptides. This is pretty typical for trypsin digests. We have appreciable numbers of semi-trpytic and oxidized Met identifications. The concern with not including these peptide forms in the search settings is that their relative fractions per sample may not be the same between different samples/conditions. Ignoring them could introduce some bias into the measurements.  
 
+> I repeated the analysis using a combined Pacific walrus and Weddell seal database instead of the Sea lion database to see the actual effect of database choice. All processing was the same as detailed above. The decrease in identified PSMs was quite dramatic. There were 142,317 PSMs, only 0.57 times as many.
+
 ---
 
 ## <a name="protein_inference"></a> Protein inference
@@ -243,6 +247,8 @@ After subset removal|2,803|
 After homology grouping|2,336|21
 
 We see that the 1% PSM FDR cutoff resulted in a similar 1% protein FRD estimate. The protein FDR depends on the number of incorrect PSMs per sample, the effective database size, and the number of samples in the experiment. The PAW pipeline does not use ad hoc, untested, heuristic protein ranking functions. The protein FDR is a consequence of the number of incorrect PSMs being accepted. To make the protein list more or less strict, one would need to change the PSM score thresholds and redo the protein inference.
+
+> The effect of using the walrus and seal database, where we had a large decrease in PSMs also decreases the number of inferred proteins. Urine is a wide dynamic range proteome. What I mean by that is that rare peptide forms from the abundant proteins are likely to be more abundant than peptides from low abundance proteins. Adding peptide forms from things like PTMs, non-fully-tryptic cleavage, or more identifiable peptides (because we have the correct species database) will more likely add decorations to abundant proteins (that have already been identified) than add new protein identifications. The sea lion database had 2,262 non-redundant, grouped proteins without counting any decoys or contaminants. The walrus plus seal database reduced the number of protein identifications by 467 to 1,795. The decrease (0.79) is considerably less that the decrease at the PSM level (0.57).
 
 ---
 
@@ -320,4 +326,6 @@ Once all of the results were present in one spreadsheet, it was easy to check th
 
 A recently sequenced California sea lion genome was used to redo sea lion urine samples from a previously published (**Ref-1**) study (data at [PXD009019](https://www.ebi.ac.uk/pride/archive/projects/PXD009019)) with the Comet/PAW pipeline. Database prep and database searching was detailed. The need for semi-trpytic searches in biofluids was explored. The PAW pipeline is visual and also aids in quality control. We saw that the data was done at two times and that the mass calibration was not the same. The flexible way that the PAW pipeline uses accurate mass was demonstrated. A greatly increased number of PSMs were identified at the same FDR. How to determine what subset of the data is quantifiable was demonstrated. Jupyter notebooks, R, edgeR, and ggplot2 were used to find the differential expression candidates. How to work with less well annotated genomes was also discussed.
 
--Phil W., July 22, 2019
+> The effect of using related species database when the system under study has not yet been sequenced was also explored. There can be pretty significant negative impacts. The protein level views are probably less effected that peptide or PSM views. The quality of quantification in shotgun experiments often depends on the numbers of PSMs, so quantification may be more seriously impacted than qualitative characterizations.
+
+-Phil W., July 22, 2019 (*updated August 3, 2019*)
